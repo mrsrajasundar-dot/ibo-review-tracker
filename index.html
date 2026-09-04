@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBO Saravanampatti - Google Review Tracker</title>
+  <!-- html2canvas for Image Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --ibo-red: #c4121a;
+      --ibo-dark-red: #9e0e15;
+      --bg-gray: #f4f5f7;
+      --text-dark: #222222;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-gray);
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .editor-card {
+      background: #ffffff;
+      max-width: 480px;
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .editor-card h3 {
+      margin-top: 0;
+      color: var(--ibo-red);
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .staff-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .staff-row input[type="text"] {
+      flex: 2;
+    }
+
+    .staff-row input[type="number"] {
+      flex: 1;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-add {
+      background-color: #f1f1f1;
+      color: #333;
+      width: 100%;
+      margin-bottom: 14px;
+      border: 1px dashed #aaa;
+    }
+
+    .btn-del {
+      background-color: #fee;
+      color: red;
+      border: 1px solid #fcc;
+    }
+
+    .btn-download {
+      background-color: var(--ibo-red);
+      color: #ffffff;
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(196, 18, 26, 0.3);
+    }
+
+    /* PREVIEW CARD FOR IMAGE GENERATION */
+    #report-card {
+      width: 440px;
+      background: #ffffff;
+      border: 3px solid var(--ibo-red);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+      background-color: var(--ibo-red);
+      color: #ffffff;
+      text-align: center;
+      padding: 18px 12px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .logo-box {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .house-icon {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 10px solid #ffffff;
+      margin-left: 2px;
+    }
+
+    .store-sub {
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .date-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: bold;
+      color: #666;
+      border-bottom: 1px dashed #ddd;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+
+    .counter-display {
+      text-align: center;
+      background: #fff5f5;
+      border: 1px solid #ffd8d8;
+      border-radius: 12px;
+      padding: 16px 10px;
+      margin-bottom: 12px;
+    }
+
+    .counter-number {
+      font-size: 58px;
+      font-weight: 900;
+      color: var(--ibo-red);
+      line-height: 1;
+      margin: 4px 0;
+    }
+
+    .target-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    /* STATUS HIGHLIGHTS (DYNAMIC) */
+    .status-badge {
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .status-low {
+      background: #ffe6e6;
+      color: #b30000;
+      border: 1px solid #ff9999;
+    }
+
+    .status-mid {
+      background: #fff8e1;
+      color: #b78103;
+      border: 1px solid #ffe082;
+    }
+
+    .status-high {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+
+    /* STAFF BREAKDOWN */
+    .staff-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    .staff-table th {
+      background-color: #f7f7f7;
+      text-align: left;
+      padding: 8px;
+      color: #444;
+      border-bottom: 2px solid #ddd;
+    }
+
+    .staff-table td {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .staff-table td.count-col {
+      text-align: right;
+      font-weight: 700;
+      color: var(--ibo-red);
+    }
+
+    /* FOOTER CALL TO ACTION */
+    .card-footer {
+      background: var(--ibo-red);
+      color: #ffffff;
+      text-align: center;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- INPUT PANEL (Will NOT appear on final image) -->
+  <div class="editor-card">
+    <h3>⚙️ Review Count Setup</h3>
+
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" id="reportDate" />
+    </div>
+
+    <div class="form-group">
+      <label>Daily Target (Default: 10)</label>
+      <input type="number" id="targetInput" value="10" min="1" oninput="updateReport()" />
+    </div>
+
+    <label style="font-size: 13px; font-weight:600; color:#555;">Staff Name & Counts</label>
+    <div id="staffContainer">
+      <div class="staff-row">
+        <input type="text" placeholder="Staff Name" value="Billing Desk" oninput="updateReport()" />
+        <input type="number" placeholder="Count" value="2" min="0" oninput="updateReport()" />
+        <button class="btn btn-del" onclick="removeStaff(this)">✕</button>
+      </div>
+    </div>
+
+    <button class="btn btn-add" onclick="addStaff()">+ Add Another Staff</button>
+
+    <button class="btn btn-download" onclick="generateImage()">📸 Download Image for WhatsApp</button>
+  </div>
+
+  <!-- EXPORTABLE REPORT CARD (Red & White Theme) -->
+  <div id="report-card">
+    <div class="card-header">
+      <div class="logo-box">
+        IBO
+      </div>
+      <div class="store-sub">Saravanampatti, Coimbatore</div>
+    </div>
+
+    <div class="card-body">
+      <div class="date-row">
+        <span>DAILY REVIEW REPORT</span>
+        <span id="displayDate">--/--/----</span>
+      </div>
+
+      <div class="counter-display">
+        <div class="target-label">TODAY'S TOTAL REVIEWS</div>
+        <div class="counter-number" id="displayTotal">0</div>
+        <div class="target-label" id="displayTargetText">Target: 10</div>
+      </div>
+
+      <!-- Dynamic Highlight Banner -->
+      <div id="statusBadge" class="status-badge status-low">
+        ⚠️ Count romba kammiya irukku! Immediate push venum.
+      </div>
+
+      <!-- Staff-wise Breakdown -->
+      <table class="staff-table">
+        <thead>
+          <tr>
+            <th>Staff / Counter Name</th>
+            <th style="text-align: right;">Reviews</th>
+          </tr>
+        </thead>
+        <tbody id="staffTableBody">
+          <!-- Injected via JS -->
+        </tbody>
+      </table>
+
+      <!-- Fixed Comment Request -->
+      <div class="card-footer">
+        📢 Please Collect Google Reviews From Customer.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Set default date to today
+    document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+
+    function addStaff() {
+      const div = document.createElement('div');
+      div.className = 'staff-row';
+      div.innerHTML = `
+        <input type="text" placeholder="Staff Name" oninput="updateReport()" />
+        <input type="number" placeholder="Count" value="0" min="0" oninput="updateReport()" />
+        <button class="btn btn-del" onclick="removeStaff(this)">✕</button>
+      `;
+      document.getElementById('staffContainer').appendChild(div);
+      updateReport();
+    }
+
+    function removeStaff(btn) {
+      btn.parentElement.remove();
+      updateReport();
+    }
+
+    function updateReport() {
+      const target = parseInt(document.getElementById('targetInput').value) || 10;
+      const dateVal = document.getElementById('reportDate').value;
+      
+      // Update Date format
+      if (dateVal) {
+        const d = new Date(dateVal);
+        document.getElementById('displayDate').innerText = d.toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+      }
+
+      // Calculate total & build table
+      let total = 0;
+      const rows = document.querySelectorAll('#staffContainer .staff-row');
+      const tableBody = document.getElementById('staffTableBody');
+      tableBody.innerHTML = '';
+
+      rows.forEach(row => {
+        const name = row.querySelector('input[type="text"]').value.trim() || 'Staff';
+        const count = parseInt(row.querySelector('input[type="number"]').value) || 0;
+        total += count;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${name}</td><td class="count-col">${count}</td>`;
+        tableBody.appendChild(tr);
+      });
+
+      document.getElementById('displayTotal').innerText = total;
+      document.getElementById('displayTargetText').innerText = `Target: ${target} Reviews`;
+
+      // Status Calculation based on user-requested tiers scaled to target:
+      // (1 to 5 = low, 6 to 9 = ok/effort, 10+ = celebration)
+      const ratio = total / target;
+      const statusBadge = document.getElementById('statusBadge');
+
+      if (total >= target) {
+        statusBadge.className = 'status-badge status-high';
+        statusBadge.innerHTML = '🎉 Super! Target Achieved! Great Celebration! 🏆';
+      } else if (ratio >= 0.6 || total >= 6) {
+        statusBadge.className = 'status-badge status-mid';
+        statusBadge.innerHTML = '⏳ OK! Innum konjam muyarchi pannanum to reach goal!';
+      } else {
+        statusBadge.className = 'status-badge status-low';
+        statusBadge.innerHTML = '⚠️ Kammiya irukku! Customer review-ku push pannanum.';
+      }
+    }
+
+    // Download Card as PNG
+    function generateImage() {
+      const card = document.getElementById('report-card');
+      html2canvas(card, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: null
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `IBO_Review_Report_${document.getElementById('reportDate').value}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+
+    // Initial run
+    updateReport();
+  </script>
+</body>
+</html>
+
