@@ -1,337 +1,432 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ta">
 <head>
-  <meta charset="UTF-8">
-  <title>Staff Review Tracker</title>
-  <!-- Google Fonts & Libraries for Image and Excel Download -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBO Saravanampatti - Review Tracker</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
   <style>
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body { background: #f0f3f8; margin: 0; padding: 15px; color: #333; }
-    .container { max-width: 750px; margin: auto; }
-    .header-card { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .header-card h1 { margin: 0; font-size: 22px; }
-    .header-card p { margin: 5px 0 0; opacity: 0.9; font-size: 13px; }
+    :root {
+      --ibo-red: #c4121a;
+      --bg-gray: #f4f5f7;
+    }
 
-    /* Navigation Tabs */
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-    .tab-btn { flex: 1; padding: 12px; border: none; background: #fff; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .tab-btn.active { background: #1e3c72; color: white; }
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
 
-    .tab-content { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.06); }
-    .tab-content.active { display: block; }
+    body {
+      background-color: var(--bg-gray);
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-    /* Forms & Inputs */
-    .form-group { margin-bottom: 15px; }
-    label { font-size: 13px; font-weight: 600; color: #444; display: block; margin-bottom: 5px; }
-    input[type="date"], input[type="month"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    
-    .staff-entry-list { margin-top: 15px; }
-    .staff-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-    .staff-name { font-weight: 500; font-size: 14px; }
-    .staff-input { width: 90px; padding: 8px; text-align: center; border: 1px solid #bbb; border-radius: 6px; font-size: 15px; font-weight: bold; }
+    .editor-card {
+      background: #ffffff;
+      max-width: 440px;
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
 
-    .submit-btn { width: 100%; background: #28a745; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.2s; }
-    .submit-btn:hover { background: #218838; }
+    .editor-card h3 {
+      margin-top: 0;
+      color: var(--ibo-red);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-    /* Reports & Tables */
-    .report-box { background: #fff; padding: 15px; border-radius: 10px; margin-top: 15px; }
-    .report-card-capture { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #e1e8ed; }
-    .report-header { text-align: center; border-bottom: 2px solid #1e3c72; padding-bottom: 10px; margin-bottom: 15px; }
-    .report-header h2 { margin: 0; color: #1e3c72; font-size: 18px; }
-    .report-header span { font-size: 13px; color: #666; font-weight: bold; }
+    .form-group {
+      margin-bottom: 12px;
+    }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { padding: 10px; text-align: left; font-size: 13px; }
-    th { background: #f4f6fa; color: #333; font-weight: 600; border-bottom: 2px solid #ddd; }
-    tr:nth-child(even) { background: #fafbfc; }
-    td.text-center, th.text-center { text-align: center; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; background: #e8f0fe; color: #1a73e8; }
-    .total-row { font-weight: bold; background: #eef3fc !important; border-top: 2px solid #1e3c72; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
 
-    /* Action Buttons */
-    .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-    .action-btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .btn-img { background: #ff7675; color: white; }
-    .btn-excel { background: #20bf6b; color: white; }
-    .msg-box { padding: 12px; border-radius: 6px; margin-top: 15px; display: none; font-size: 14px; text-align: center; font-weight: 500; }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .staff-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .staff-row input[type="text"] { flex: 2; }
+    .staff-row input[type="number"] { flex: 1; }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-add {
+      background-color: #f1f1f1;
+      color: #333;
+      width: 100%;
+      margin-bottom: 10px;
+      border: 1px dashed #aaa;
+    }
+
+    .btn-del {
+      background-color: #fee;
+      color: red;
+      border: 1px solid #fcc;
+    }
+
+    .btn-download {
+      background-color: var(--ibo-red);
+      color: #ffffff;
+      width: 100%;
+      padding: 14px;
+      font-size: 15px;
+      border-radius: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-reset {
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 12px;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* PREVIEW CARD FOR WHATSAPP */
+    #report-card {
+      width: 440px;
+      background: #ffffff;
+      border: 3px solid var(--ibo-red);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+      background-color: var(--ibo-red);
+      color: #ffffff;
+      text-align: center;
+      padding: 18px 12px;
+    }
+
+    .logo-box {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .store-sub {
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .date-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: bold;
+      color: #666;
+      border-bottom: 1px dashed #ddd;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+
+    .counter-display {
+      text-align: center;
+      background: #fff5f5;
+      border: 1px solid #ffd8d8;
+      border-radius: 12px;
+      padding: 16px 10px;
+      margin-bottom: 12px;
+    }
+
+    .counter-number {
+      font-size: 58px;
+      font-weight: 900;
+      color: var(--ibo-red);
+      line-height: 1;
+      margin: 4px 0;
+    }
+
+    .target-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .status-badge {
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .status-low {
+      background: #ffe6e6;
+      color: #b30000;
+      border: 1px solid #ff9999;
+    }
+
+    .status-mid {
+      background: #fff8e1;
+      color: #b78103;
+      border: 1px solid #ffe082;
+    }
+
+    .status-high {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+
+    .staff-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    .staff-table th {
+      background-color: #f7f7f7;
+      text-align: left;
+      padding: 8px;
+      color: #444;
+      border-bottom: 2px solid #ddd;
+    }
+
+    .staff-table td {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .staff-table td.count-col {
+      text-align: right;
+      font-weight: 700;
+      color: var(--ibo-red);
+    }
+
+    .card-footer {
+      background: var(--ibo-red);
+      color: #ffffff;
+      text-align: center;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 13px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="header-card">
-    <h1>⭐ IBO Store - Staff Reviews Tracker</h1>
-    <p>Daily Tracking, Live Reports & Instant Export</p>
-  </div>
+  <div class="editor-card">
+    <h3>
+      <span>⚙️ Review Setup</span>
+      <button class="btn-reset" onclick="resetData()">Clear / Reset</button>
+    </h3>
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('entryTab')">✏️ Add Daily</button>
-    <button class="tab-btn" onclick="switchTab('dailyTab'); loadReports();">📅 Daily Report</button>
-    <button class="tab-btn" onclick="switchTab('monthlyTab'); loadReports();">📊 Monthly Report</button>
-  </div>
-
-  <!-- 1. DAILY ENTRY TAB -->
-  <div id="entryTab" class="tab-content active">
     <div class="form-group">
-      <label>தேதி (Date):</label>
-      <input type="date" id="entryDate">
+      <label>Date</label>
+      <input type="date" id="reportDate" onchange="saveAndRender()" />
     </div>
 
-    <div class="staff-entry-list" id="staffInputRows">
-      <!-- Generated via JS -->
+    <div class="form-group">
+      <label>Daily Target</label>
+      <input type="number" id="targetInput" value="10" min="1" oninput="saveAndRender()" />
     </div>
 
-    <button class="submit-btn" id="saveBtn" onclick="saveReviews()">💾 சேமிக்கவும் (Save Reviews)</button>
-    <div id="statusMsg" class="msg-box"></div>
+    <label style="font-size: 13px; font-weight:600; color:#555;">Staff Name & Count</label>
+    <div id="staffContainer"></div>
+
+    <button class="btn btn-add" onclick="addStaffRow('', 0)">+ Add Another Staff</button>
+    <button class="btn btn-download" onclick="generateImage()">📸 Download Image for WhatsApp</button>
   </div>
 
-  <!-- 2. DAILY REPORT TAB -->
-  <div id="dailyTab" class="tab-content">
-    <div class="form-group">
-      <label>தேதியை தேர்ந்தெடுக்கவும்:</label>
-      <input type="date" id="filterDailyDate" onchange="renderDailyReport()">
+  <div id="report-card">
+    <div class="card-header">
+      <div class="logo-box">IBO</div>
+      <div class="store-sub">Saravanampatti, Coimbatore</div>
     </div>
 
-    <!-- Capture Area for Image Download -->
-    <div class="report-card-capture" id="dailyReportCaptureArea">
-      <div class="report-header">
-        <h2>IBO Saravanampatti - Daily Review Report</h2>
-        <span id="dailyDateDisplay"></span>
+    <div class="card-body">
+      <div class="date-row">
+        <span>DAILY REVIEW REPORT</span>
+        <span id="displayDate">--/--/----</span>
       </div>
-      <table id="dailyTable">
+
+      <div class="counter-display">
+        <div class="target-label">TODAY'S TOTAL REVIEWS</div>
+        <div class="counter-number" id="displayTotal">0</div>
+        <div class="target-label" id="displayTargetText">Target: 10</div>
+      </div>
+
+      <div id="statusBadge" class="status-badge status-low">
+        ⚠️ Count romba kammiya irukku! Immediate push venum.
+      </div>
+
+      <table class="staff-table">
         <thead>
           <tr>
-            <th class="text-center">#</th>
-            <th>Staff Name</th>
-            <th class="text-center">Reviews</th>
-            <th class="text-center">Share %</th>
+            <th>Staff / Counter Name</th>
+            <th style="text-align: right;">Reviews</th>
           </tr>
         </thead>
-        <tbody id="dailyTableBody"></tbody>
+        <tbody id="staffTableBody"></tbody>
       </table>
-    </div>
 
-    <div class="btn-group">
-      <button class="action-btn btn-img" onclick="downloadImage('dailyReportCaptureArea', 'Daily_Review_Report')">📸 Download as Image (WhatsApp)</button>
-      <button class="action-btn btn-excel" onclick="downloadExcel('dailyTable', 'Daily_Review_Report')">📥 Download as Excel</button>
-    </div>
-  </div>
-
-  <!-- 3. MONTHLY REPORT TAB -->
-  <div id="monthlyTab" class="tab-content">
-    <div class="form-group">
-      <label>மாதத்தை தேர்ந்தெடுக்கவும்:</label>
-      <input type="month" id="filterMonth" onchange="renderMonthlyReport()">
-    </div>
-
-    <!-- Capture Area for Image Download -->
-    <div class="report-card-capture" id="monthlyReportCaptureArea">
-      <div class="report-header">
-        <h2>IBO Saravanampatti - Monthly Review Report</h2>
-        <span id="monthlyDateDisplay"></span>
+      <div class="card-footer">
+        📢 Please Collect Google Reviews From Customer.
       </div>
-      <table id="monthlyTable">
-        <thead>
-          <tr>
-            <th class="text-center">Rank</th>
-            <th>Staff Name</th>
-            <th class="text-center">Total Reviews</th>
-            <th class="text-center">Avg/Day</th>
-          </tr>
-        </thead>
-        <tbody id="monthlyTableBody"></tbody>
-      </table>
-    </div>
-
-    <div class="btn-group">
-      <button class="action-btn btn-img" onclick="downloadImage('monthlyReportCaptureArea', 'Monthly_Review_Report')">📸 Download as Image (WhatsApp)</button>
-      <button class="action-btn btn-excel" onclick="downloadExcel('monthlyTable', 'Monthly_Review_Report')">📥 Download as Excel</button>
     </div>
   </div>
-</div>
 
-<script>
-  const staffList = [
-    "Ramachandran",
-    "Gowri",
-    "Kulanthai Velu",
-    "Victor",
-    "Mathumitha",
-    "Hari Prakash",
-    "Hema",
-    "Karthika",
-    "Pradeep"
-  ];
+  <script>
+    const STORAGE_KEY = 'ibo_review_data_v1';
 
-  let allReviews = [];
-
-  window.onload = function() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('entryDate').value = today;
-    document.getElementById('filterDailyDate').value = today;
-    document.getElementById('filterMonth').value = today.substring(0, 7);
-
-    // Build Staff Input Fields
-    const container = document.getElementById('staffInputRows');
-    staffList.forEach((name, i) => {
-      container.innerHTML += `
-        <div class="staff-row">
-          <div class="staff-name">${i+1}. ${name}</div>
-          <input type="number" min="0" value="0" class="staff-input" id="staff_cnt_${i}" data-staff="${name}">
-        </div>
-      `;
-    });
-  };
-
-  function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    event.target.classList.add('active');
-  }
-
-  function saveReviews() {
-    const date = document.getElementById('entryDate').value;
-    const saveBtn = document.getElementById('saveBtn');
-    const msg = document.getElementById('statusMsg');
-
-    if (!date) { alert("தயவுசெய்து தேதியைத் தேர்ந்தெடுக்கவும்!"); return; }
-
-    const entries = [];
-    staffList.forEach((name, i) => {
-      const val = parseInt(document.getElementById(`staff_cnt_${i}`).value) || 0;
-      entries.push({ date: date, staff: name, count: val });
-    });
-
-    saveBtn.innerText = "⏳ சேமிக்கப்படுகிறது...";
-    saveBtn.disabled = true;
-
-    google.script.run.withSuccessHandler(res => {
-      saveBtn.innerText = "💾 சேமிக்கவும் (Save Reviews)";
-      saveBtn.disabled = false;
-      msg.style.display = "block";
-      if (res.success) {
-        msg.style.background = "#d4edda";
-        msg.style.color = "#155724";
-        msg.innerText = res.message;
-        // Reset Inputs
-        staffList.forEach((_, i) => document.getElementById(`staff_cnt_${i}`).value = 0);
+    function init() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          document.getElementById('reportDate').value = data.date || new Date().toISOString().split('T')[0];
+          document.getElementById('targetInput').value = data.target || 10;
+          document.getElementById('staffContainer').innerHTML = '';
+          if (data.staff && data.staff.length > 0) {
+            data.staff.forEach(s => addStaffRow(s.name, s.count));
+          } else {
+            addStaffRow('Billing Desk', 2);
+          }
+        } catch(e) {
+          defaultSetup();
+        }
       } else {
-        msg.style.background = "#f8d7da";
-        msg.style.color = "#721c24";
-        msg.innerText = res.message;
+        defaultSetup();
       }
-    }).saveDailyReviews(entries);
-  }
+      saveAndRender();
+    }
 
-  function loadReports() {
-    google.script.run.withSuccessHandler(data => {
-      allReviews = data;
-      renderDailyReport();
-      renderMonthlyReport();
-    }).getAllReviewsData();
-  }
+    function defaultSetup() {
+      document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('targetInput').value = 10;
+      document.getElementById('staffContainer').innerHTML = '';
+      addStaffRow('Billing Desk', 2);
+    }
 
-  function renderDailyReport() {
-    const selectedDate = document.getElementById('filterDailyDate').value;
-    document.getElementById('dailyDateDisplay').innerText = "Date: " + selectedDate;
-    const tbody = document.getElementById('dailyTableBody');
-    tbody.innerHTML = "";
-
-    const filtered = allReviews.filter(r => r.date === selectedDate);
-    const countMap = {};
-    staffList.forEach(s => countMap[s] = 0);
-    filtered.forEach(r => { countMap[r.staff] = (countMap[r.staff] || 0) + r.count; });
-
-    let total = 0;
-    Object.values(countMap).forEach(v => total += v);
-
-    // Sort descending
-    const sorted = Object.keys(countMap).map(k => ({ name: k, count: countMap[k] }))
-                         .sort((a, b) => b.count - a.count);
-
-    sorted.forEach((item, index) => {
-      const share = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
-      tbody.innerHTML += `
-        <tr>
-          <td class="text-center">${index + 1}</td>
-          <td><b>${item.name}</b></td>
-          <td class="text-center"><span class="badge">${item.count}</span></td>
-          <td class="text-center">${share}%</td>
-        </tr>
+    function addStaffRow(name = '', count = 0) {
+      const div = document.createElement('div');
+      div.className = 'staff-row';
+      div.innerHTML = `
+        <input type="text" placeholder="Staff Name" value="${name}" oninput="saveAndRender()" />
+        <input type="number" placeholder="Count" value="${count}" min="0" oninput="saveAndRender()" />
+        <button class="btn btn-del" onclick="this.parentElement.remove(); saveAndRender();">✕</button>
       `;
-    });
+      document.getElementById('staffContainer').appendChild(div);
+      saveAndRender();
+    }
 
-    tbody.innerHTML += `
-      <tr class="total-row">
-        <td colspan="2">மொத்த ரிவியூக்கள் (Total)</td>
-        <td class="text-center">${total}</td>
-        <td class="text-center">100%</td>
-      </tr>
-    `;
-  }
+    function saveAndRender() {
+      const target = parseInt(document.getElementById('targetInput').value) || 10;
+      const dateVal = document.getElementById('reportDate').value;
+      const staffRows = document.querySelectorAll('#staffContainer .staff-row');
+      
+      const staffData = [];
+      let total = 0;
+      const tableBody = document.getElementById('staffTableBody');
+      tableBody.innerHTML = '';
 
-  function renderMonthlyReport() {
-    const selectedMonth = document.getElementById('filterMonth').value; // YYYY-MM
-    document.getElementById('monthlyDateDisplay').innerText = "Month: " + selectedMonth;
-    const tbody = document.getElementById('monthlyTableBody');
-    tbody.innerHTML = "";
+      staffRows.forEach(row => {
+        const name = row.querySelector('input[type="text"]').value.trim() || 'Staff';
+        const count = parseInt(row.querySelector('input[type="number"]').value) || 0;
+        total += count;
+        staffData.push({ name, count });
 
-    const filtered = allReviews.filter(r => r.date.startsWith(selectedMonth));
-    const countMap = {};
-    staffList.forEach(s => countMap[s] = 0);
-    filtered.forEach(r => { countMap[r.staff] = (countMap[r.staff] || 0) + r.count; });
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${name}</td><td class="count-col">${count}</td>`;
+        tableBody.appendChild(tr);
+      });
 
-    let total = 0;
-    Object.values(countMap).forEach(v => total += v);
+      // Save to localStorage so reload won't clear data
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        date: dateVal,
+        target: target,
+        staff: staffData
+      }));
 
-    const sorted = Object.keys(countMap).map(k => ({ name: k, count: countMap[k] }))
-                         .sort((a, b) => b.count - a.count);
+      // Render Display
+      if (dateVal) {
+        const d = new Date(dateVal);
+        document.getElementById('displayDate').innerText = d.toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+      }
 
-    sorted.forEach((item, index) => {
-      const avg = (item.count / 30).toFixed(1);
-      const medal = index === 0 && item.count > 0 ? "🥇 " : index === 1 && item.count > 0 ? "🥈 " : index === 2 && item.count > 0 ? "🥉 " : "";
-      tbody.innerHTML += `
-        <tr>
-          <td class="text-center">${index + 1}</td>
-          <td><b>${medal}${item.name}</b></td>
-          <td class="text-center"><span class="badge">${item.count}</span></td>
-          <td class="text-center">${avg}</td>
-        </tr>
-      `;
-    });
+      document.getElementById('displayTotal').innerText = total;
+      document.getElementById('displayTargetText').innerText = `Target: ${target} Reviews`;
 
-    tbody.innerHTML += `
-      <tr class="total-row">
-        <td colspan="2">மாதத்தின் மொத்த எண்ணிக்கை (Total)</td>
-        <td class="text-center">${total}</td>
-        <td class="text-center">-</td>
-      </tr>
-    `;
-  }
+      const badge = document.getElementById('statusBadge');
+      if (total >= target) {
+        badge.className = 'status-badge status-high';
+        badge.innerHTML = '🎉 Super! Target Achieved! Great Celebration! 🏆';
+      } else if ((total / target) >= 0.6 || total >= 6) {
+        badge.className = 'status-badge status-mid';
+        badge.innerHTML = '⏳ OK! Innum konjam muyarchi pannanum to reach goal!';
+      } else {
+        badge.className = 'status-badge status-low';
+        badge.innerHTML = '⚠️ Kammiya irukku! Customer review-ku push pannanum.';
+      }
+    }
 
-  // 1-Click WhatsApp Image Download
-  function downloadImage(elementId, baseName) {
-    const target = document.getElementById(elementId);
-    html2canvas(target, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-      const link = document.createElement('a');
-      link.download = `${baseName}_${new Date().toISOString().slice(0,10)}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
-  }
+    function resetData() {
+      if (confirm('Indha naalin data-vai clear seiyava?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        defaultSetup();
+        saveAndRender();
+      }
+    }
 
-  // 1-Click Excel Download
-  function downloadExcel(tableId, baseName) {
-    const table = document.getElementById(tableId);
-    const wb = XLSX.utils.table_to_book(table, { sheet: "Reviews_Report" });
-    XLSX.writeFile(wb, `${baseName}_${new Date().toISOString().slice(0,10)}.xlsx`);
-  }
-</script>
+    function generateImage() {
+      const card = document.getElementById('report-card');
+      html2canvas(card, { scale: 3, useCORS: true }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `IBO_Review_${document.getElementById('reportDate').value}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
 
+    init();
+  </script>
 </body>
 </html>
