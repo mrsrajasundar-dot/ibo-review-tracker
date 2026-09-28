@@ -1,432 +1,211 @@
 <!DOCTYPE html>
 <html lang="ta">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IBO Saravanampatti - Review Tracker</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Counter Cash Report</title>
   <style>
-    :root {
-      --ibo-red: #c4121a;
-      --bg-gray: #f4f5f7;
-    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background-color: #eef2f6; margin: 0; padding: 15px; display: flex; justify-content: center; }
+    .sheet-container { background: #fff; width: 100%; max-width: 680px; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; }
+    
+    .sheet-title { text-align: center; margin-top: 0; margin-bottom: 12px; color: #334155; font-size: 20px; }
+    .date-row { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 15px; gap: 8px; font-weight: bold; }
+    .date-row input { padding: 6px 10px; border: 1px solid #94a3b8; border-radius: 5px; font-weight: bold; }
 
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { border: 1px solid #64748b; padding: 8px; text-align: center; font-size: 14px; }
+    
+    /* Excel Brown Header Theme */
+    .header-brown { background-color: #c07248; color: #ffffff; font-weight: bold; }
+    .sub-header { background-color: #edd5c5; color: #000; font-weight: 600; }
+    
+    input[type="number"] { width: 100%; max-width: 75px; padding: 5px; text-align: center; border: 1px solid #94a3b8; border-radius: 4px; font-size: 14px; }
+    input[type="number"]:focus { outline: 2px solid #c07248; background-color: #fffbeb; }
 
-    body {
-      background-color: var(--bg-gray);
-      margin: 0;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    .total-row { font-weight: bold; background-color: #f1f5f9; }
+    .grand-highlight { background-color: #fde68a; font-weight: bold; }
+    
+    .diff-table td { padding: 8px 12px; font-size: 15px; }
+    .amt-col { text-align: right; padding-right: 12px; font-weight: bold; }
 
-    .editor-card {
-      background: #ffffff;
-      max-width: 440px;
-      width: 100%;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-
-    .editor-card h3 {
-      margin-top: 0;
-      color: var(--ibo-red);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #555;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-
-    .staff-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .staff-row input[type="text"] { flex: 2; }
-    .staff-row input[type="number"] { flex: 1; }
-
-    .btn {
-      padding: 10px 14px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .btn-add {
-      background-color: #f1f1f1;
-      color: #333;
-      width: 100%;
-      margin-bottom: 10px;
-      border: 1px dashed #aaa;
-    }
-
-    .btn-del {
-      background-color: #fee;
-      color: red;
-      border: 1px solid #fcc;
-    }
-
-    .btn-download {
-      background-color: var(--ibo-red);
-      color: #ffffff;
-      width: 100%;
-      padding: 14px;
-      font-size: 15px;
-      border-radius: 8px;
-      margin-top: 6px;
-    }
-
-    .btn-reset {
-      background: none;
-      border: none;
-      color: #888;
-      font-size: 12px;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    /* PREVIEW CARD FOR WHATSAPP */
-    #report-card {
-      width: 440px;
-      background: #ffffff;
-      border: 3px solid var(--ibo-red);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-
-    .card-header {
-      background-color: var(--ibo-red);
-      color: #ffffff;
-      text-align: center;
-      padding: 18px 12px;
-    }
-
-    .logo-box {
-      font-size: 32px;
-      font-weight: 900;
-      letter-spacing: 2px;
-    }
-
-    .store-sub {
-      font-size: 12px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-weight: 600;
-      opacity: 0.95;
-    }
-
-    .card-body {
-      padding: 16px;
-    }
-
-    .date-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      font-weight: bold;
-      color: #666;
-      border-bottom: 1px dashed #ddd;
-      padding-bottom: 8px;
-      margin-bottom: 14px;
-    }
-
-    .counter-display {
-      text-align: center;
-      background: #fff5f5;
-      border: 1px solid #ffd8d8;
-      border-radius: 12px;
-      padding: 16px 10px;
-      margin-bottom: 12px;
-    }
-
-    .counter-number {
-      font-size: 58px;
-      font-weight: 900;
-      color: var(--ibo-red);
-      line-height: 1;
-      margin: 4px 0;
-    }
-
-    .target-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-    }
-
-    .status-badge {
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 14px;
-    }
-
-    .status-low {
-      background: #ffe6e6;
-      color: #b30000;
-      border: 1px solid #ff9999;
-    }
-
-    .status-mid {
-      background: #fff8e1;
-      color: #b78103;
-      border: 1px solid #ffe082;
-    }
-
-    .status-high {
-      background: #e8f5e9;
-      color: #1b5e20;
-      border: 1px solid #a5d6a7;
-    }
-
-    .staff-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 14px;
-      font-size: 13px;
-    }
-
-    .staff-table th {
-      background-color: #f7f7f7;
-      text-align: left;
-      padding: 8px;
-      color: #444;
-      border-bottom: 2px solid #ddd;
-    }
-
-    .staff-table td {
-      padding: 8px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .staff-table td.count-col {
-      text-align: right;
-      font-weight: 700;
-      color: var(--ibo-red);
-    }
-
-    .card-footer {
-      background: var(--ibo-red);
-      color: #ffffff;
-      text-align: center;
-      padding: 12px;
-      font-weight: bold;
-      font-size: 13px;
-      border-radius: 8px;
-    }
+    .btn-wrap { display: flex; gap: 10px; margin-top: 10px; }
+    .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+    .btn-reset { background: #ef4444; color: white; }
+    .btn-print { background: #2563eb; color: white; }
   </style>
 </head>
 <body>
 
-  <div class="editor-card">
-    <h3>
-      <span>⚙️ Review Setup</span>
-      <button class="btn-reset" onclick="resetData()">Clear / Reset</button>
-    </h3>
-
-    <div class="form-group">
-      <label>Date</label>
-      <input type="date" id="reportDate" onchange="saveAndRender()" />
-    </div>
-
-    <div class="form-group">
-      <label>Daily Target</label>
-      <input type="number" id="targetInput" value="10" min="1" oninput="saveAndRender()" />
-    </div>
-
-    <label style="font-size: 13px; font-weight:600; color:#555;">Staff Name & Count</label>
-    <div id="staffContainer"></div>
-
-    <button class="btn btn-add" onclick="addStaffRow('', 0)">+ Add Another Staff</button>
-    <button class="btn btn-download" onclick="generateImage()">📸 Download Image for WhatsApp</button>
+<div class="sheet-container">
+  <h2 class="sheet-title">Daily Counter Cash Management</h2>
+  
+  <div class="date-row">
+    <label>Date:</label>
+    <input type="text" id="reportDate" value="25-09-2026">
   </div>
 
-  <div id="report-card">
-    <div class="card-header">
-      <div class="logo-box">IBO</div>
-      <div class="store-sub">Saravanampatti, Coimbatore</div>
-    </div>
+  <!-- TABLE 1: TOTAL SALE CASH (Counter 1 + Counter 2) -->
+  <table>
+    <thead>
+      <tr class="header-brown">
+        <th colspan="5">TOTAL SALE CASH</th>
+      </tr>
+      <tr class="sub-header">
+        <th style="width: 18%;">Denom</th>
+        <th style="width: 20%;">C-1 Count</th>
+        <th style="width: 20%;">C-2 Count</th>
+        <th style="width: 17%;">Total Count</th>
+        <th style="width: 25%;">Amount (₹)</th>
+      </tr>
+    </thead>
+    <tbody id="saleBody">
+      <!-- Generated rows for 500, 200, 100, 50, 20, 10, Coin -->
+    </tbody>
+    <tfoot>
+      <tr class="total-row header-brown">
+        <td colspan="3" style="text-align: right; padding-right: 15px;">Total Sale Cash:</td>
+        <td id="totalSaleCount">0</td>
+        <td class="amt-col" id="totalSaleAmount">₹ 0.00</td>
+      </tr>
+    </tfoot>
+  </table>
 
-    <div class="card-body">
-      <div class="date-row">
-        <span>DAILY REVIEW REPORT</span>
-        <span id="displayDate">--/--/----</span>
-      </div>
+  <!-- Difference / Balance Check Section -->
+  <table class="diff-table">
+    <tr style="background-color: #f8fafc;">
+      <td style="font-weight: bold; width: 45%;">System / POS Sale Cash:</td>
+      <td style="width: 25%;">
+        <input type="number" id="posCash" placeholder="0" style="max-width: 120px;" oninput="updateCalculations()">
+      </td>
+      <td class="amt-col" id="diffDisplay" style="color: #0f766e;">Diff: ₹ 0.00</td>
+    </tr>
+  </table>
 
-      <div class="counter-display">
-        <div class="target-label">TODAY'S TOTAL REVIEWS</div>
-        <div class="counter-number" id="displayTotal">0</div>
-        <div class="target-label" id="displayTargetText">Target: 10</div>
-      </div>
+  <!-- TABLE 2: FLOAT CASH (Separate Table) -->
+  <table>
+    <thead>
+      <tr class="header-brown">
+        <th colspan="3">FLOAT CASH</th>
+      </tr>
+      <tr class="sub-header">
+        <th style="width: 25%;">Denom</th>
+        <th style="width: 35%;">Count</th>
+        <th style="width: 40%;">Amount (₹)</th>
+      </tr>
+    </thead>
+    <tbody id="floatBody">
+      <!-- Generated rows for Float -->
+    </tbody>
+    <tfoot>
+      <tr class="total-row header-brown">
+        <td style="text-align: right; padding-right: 15px;">Total Float:</td>
+        <td id="totalFloatCount">0</td>
+        <td class="amt-col" id="totalFloatAmount">₹ 0.00</td>
+      </tr>
+    </tfoot>
+  </table>
 
-      <div id="statusBadge" class="status-badge status-low">
-        ⚠️ Count romba kammiya irukku! Immediate push venum.
-      </div>
-
-      <table class="staff-table">
-        <thead>
-          <tr>
-            <th>Staff / Counter Name</th>
-            <th style="text-align: right;">Reviews</th>
-          </tr>
-        </thead>
-        <tbody id="staffTableBody"></tbody>
-      </table>
-
-      <div class="card-footer">
-        📢 Please Collect Google Reviews From Customer.
-      </div>
-    </div>
+  <!-- Buttons -->
+  <div class="btn-wrap">
+    <button class="btn btn-reset" onclick="resetForm()">Reset All</button>
+    <button class="btn btn-print" onclick="window.print()">Print / Save PDF</button>
   </div>
+</div>
 
-  <script>
-    const STORAGE_KEY = 'ibo_review_data_v1';
+<script>
+  const denoms = [
+    { label: "500", val: 500 },
+    { label: "200", val: 200 },
+    { label: "100", val: 100 },
+    { label: "50", val: 50 },
+    { label: "20", val: 20 },
+    { label: "10", val: 10 },
+    { label: "Coin", val: 1 }
+  ];
 
-    function init() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          document.getElementById('reportDate').value = data.date || new Date().toISOString().split('T')[0];
-          document.getElementById('targetInput').value = data.target || 10;
-          document.getElementById('staffContainer').innerHTML = '';
-          if (data.staff && data.staff.length > 0) {
-            data.staff.forEach(s => addStaffRow(s.name, s.count));
-          } else {
-            addStaffRow('Billing Desk', 2);
-          }
-        } catch(e) {
-          defaultSetup();
-        }
-      } else {
-        defaultSetup();
-      }
-      saveAndRender();
-    }
+  function renderTables() {
+    const saleBody = document.getElementById('saleBody');
+    const floatBody = document.getElementById('floatBody');
 
-    function defaultSetup() {
-      document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('targetInput').value = 10;
-      document.getElementById('staffContainer').innerHTML = '';
-      addStaffRow('Billing Desk', 2);
-    }
-
-    function addStaffRow(name = '', count = 0) {
-      const div = document.createElement('div');
-      div.className = 'staff-row';
-      div.innerHTML = `
-        <input type="text" placeholder="Staff Name" value="${name}" oninput="saveAndRender()" />
-        <input type="number" placeholder="Count" value="${count}" min="0" oninput="saveAndRender()" />
-        <button class="btn btn-del" onclick="this.parentElement.remove(); saveAndRender();">✕</button>
+    denoms.forEach((d, i) => {
+      // Sale Table Row
+      saleBody.innerHTML += `
+        <tr>
+          <td><strong>${d.label}</strong></td>
+          <td><input type="number" min="0" id="c1_${i}" oninput="updateCalculations()"></td>
+          <td><input type="number" min="0" id="c2_${i}" oninput="updateCalculations()"></td>
+          <td id="sumCount_${i}">0</td>
+          <td class="amt-col" id="amt_${i}">₹ 0.00</td>
+        </tr>
       `;
-      document.getElementById('staffContainer').appendChild(div);
-      saveAndRender();
-    }
 
-    function saveAndRender() {
-      const target = parseInt(document.getElementById('targetInput').value) || 10;
-      const dateVal = document.getElementById('reportDate').value;
-      const staffRows = document.querySelectorAll('#staffContainer .staff-row');
-      
-      const staffData = [];
-      let total = 0;
-      const tableBody = document.getElementById('staffTableBody');
-      tableBody.innerHTML = '';
-
-      staffRows.forEach(row => {
-        const name = row.querySelector('input[type="text"]').value.trim() || 'Staff';
-        const count = parseInt(row.querySelector('input[type="number"]').value) || 0;
-        total += count;
-        staffData.push({ name, count });
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${name}</td><td class="count-col">${count}</td>`;
-        tableBody.appendChild(tr);
-      });
-
-      // Save to localStorage so reload won't clear data
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        date: dateVal,
-        target: target,
-        staff: staffData
-      }));
-
-      // Render Display
-      if (dateVal) {
-        const d = new Date(dateVal);
-        document.getElementById('displayDate').innerText = d.toLocaleDateString('en-IN', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric'
-        });
+      // Float Table Row (without coin if not needed, or with coin)
+      if (d.label !== "Coin") {
+        floatBody.innerHTML += `
+          <tr>
+            <td><strong>${d.label}</strong></td>
+            <td><input type="number" min="0" id="flt_${i}" oninput="updateCalculations()"></td>
+            <td class="amt-col" id="fltAmt_${i}">₹ 0.00</td>
+          </tr>
+        `;
       }
+    });
+  }
 
-      document.getElementById('displayTotal').innerText = total;
-      document.getElementById('displayTargetText').innerText = `Target: ${target} Reviews`;
+  function updateCalculations() {
+    let grandSaleCount = 0;
+    let grandSaleAmt = 0;
 
-      const badge = document.getElementById('statusBadge');
-      if (total >= target) {
-        badge.className = 'status-badge status-high';
-        badge.innerHTML = '🎉 Super! Target Achieved! Great Celebration! 🏆';
-      } else if ((total / target) >= 0.6 || total >= 6) {
-        badge.className = 'status-badge status-mid';
-        badge.innerHTML = '⏳ OK! Innum konjam muyarchi pannanum to reach goal!';
-      } else {
-        badge.className = 'status-badge status-low';
-        badge.innerHTML = '⚠️ Kammiya irukku! Customer review-ku push pannanum.';
+    denoms.forEach((d, i) => {
+      let c1 = parseInt(document.getElementById(`c1_${i}`).value) || 0;
+      let c2 = parseInt(document.getElementById(`c2_${i}`).value) || 0;
+      let rowCount = c1 + c2;
+      let rowAmt = rowCount * d.val;
+
+      grandSaleCount += rowCount;
+      grandSaleAmt += rowAmt;
+
+      document.getElementById(`sumCount_${i}`).innerText = rowCount;
+      document.getElementById(`amt_${i}`).innerText = "₹ " + rowAmt.toLocaleString('en-IN', {minimumFractionDigits: 2});
+    });
+
+    document.getElementById('totalSaleCount').innerText = grandSaleCount;
+    document.getElementById('totalSaleAmount').innerText = "₹ " + grandSaleAmt.toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+    // POS Cash Difference Check
+    let posVal = parseFloat(document.getElementById('posCash').value) || 0;
+    let diff = grandSaleAmt - posVal;
+    let diffEl = document.getElementById('diffDisplay');
+    diffEl.innerText = (diff >= 0 ? "+ ₹ " : "- ₹ ") + Math.abs(diff).toLocaleString('en-IN', {minimumFractionDigits: 2});
+    diffEl.style.color = diff === 0 ? "#0f766e" : (diff > 0 ? "#16a34a" : "#dc2626");
+
+    // Float Calculations
+    let grandFloatCount = 0;
+    let grandFloatAmt = 0;
+
+    denoms.forEach((d, i) => {
+      let fltInput = document.getElementById(`flt_${i}`);
+      if (fltInput) {
+        let count = parseInt(fltInput.value) || 0;
+        let amt = count * d.val;
+        grandFloatCount += count;
+        grandFloatAmt += amt;
+        document.getElementById(`fltAmt_${i}`).innerText = "₹ " + amt.toLocaleString('en-IN', {minimumFractionDigits: 2});
       }
-    }
+    });
 
-    function resetData() {
-      if (confirm('Indha naalin data-vai clear seiyava?')) {
-        localStorage.removeItem(STORAGE_KEY);
-        defaultSetup();
-        saveAndRender();
-      }
-    }
+    document.getElementById('totalFloatCount').innerText = grandFloatCount;
+    document.getElementById('totalFloatAmount').innerText = "₹ " + grandFloatAmt.toLocaleString('en-IN', {minimumFractionDigits: 2});
+  }
 
-    function generateImage() {
-      const card = document.getElementById('report-card');
-      html2canvas(card, { scale: 3, useCORS: true }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `IBO_Review_${document.getElementById('reportDate').value}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      });
-    }
+  function resetForm() {
+    document.querySelectorAll('input[type="number"]').forEach(input => input.value = '');
+    updateCalculations();
+  }
 
-    init();
-  </script>
+  renderTables();
+</script>
+
 </body>
 </html>
