@@ -1,211 +1,1038 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Counter Cash Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Daily Cash Tally Counter</title>
   <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-    body { background-color: #eef2f6; margin: 0; padding: 15px; display: flex; justify-content: center; }
-    .sheet-container { background: #fff; width: 100%; max-width: 680px; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; }
-    
-    .sheet-title { text-align: center; margin-top: 0; margin-bottom: 12px; color: #334155; font-size: 20px; }
-    .date-row { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 15px; gap: 8px; font-weight: bold; }
-    .date-row input { padding: 6px 10px; border: 1px solid #94a3b8; border-radius: 5px; font-weight: bold; }
+    :root {
+      --primary-red: #d32f2f;
+      --primary-dark: #b71c1c;
+      --primary-light: #ffebee;
+      --accent-red: #e53935;
+      --bg-gray: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-dark: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #f1d5d5;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --warning: #b45309;
+      --warning-bg: #fef3c7;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+    }
 
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    th, td { border: 1px solid #64748b; padding: 8px; text-align: center; font-size: 14px; }
-    
-    /* Excel Brown Header Theme */
-    .header-brown { background-color: #c07248; color: #ffffff; font-weight: bold; }
-    .sub-header { background-color: #edd5c5; color: #000; font-weight: 600; }
-    
-    input[type="number"] { width: 100%; max-width: 75px; padding: 5px; text-align: center; border: 1px solid #94a3b8; border-radius: 4px; font-size: 14px; }
-    input[type="number"]:focus { outline: 2px solid #c07248; background-color: #fffbeb; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-    .total-row { font-weight: bold; background-color: #f1f5f9; }
-    .grand-highlight { background-color: #fde68a; font-weight: bold; }
-    
-    .diff-table td { padding: 8px 12px; font-size: 15px; }
-    .amt-col { text-align: right; padding-right: 12px; font-weight: bold; }
+    body {
+      background-color: var(--bg-gray);
+      color: var(--text-dark);
+      padding-bottom: 90px;
+      font-size: 14px;
+    }
 
-    .btn-wrap { display: flex; gap: 10px; margin-top: 10px; }
-    .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
-    .btn-reset { background: #ef4444; color: white; }
-    .btn-print { background: #2563eb; color: white; }
+    /* Top Red Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary-dark), var(--accent-red));
+      color: white;
+      padding: 16px 16px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(211, 47, 47, 0.25);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .icon-btn:active {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .date-row {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+
+    .date-row label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+      opacity: 0.9;
+    }
+
+    .date-row input[type="date"] {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 13px;
+      font-weight: bold;
+      outline: none;
+      width: 100%;
+    }
+
+    /* Navigation Pills */
+    .tabs-nav {
+      display: flex;
+      overflow-x: auto;
+      background: white;
+      padding: 8px 12px;
+      gap: 8px;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 92px;
+      z-index: 90;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      scrollbar-width: none;
+    }
+    .tabs-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      border-radius: 20px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      color: #4b5563;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--primary-red);
+      color: white;
+      border-color: var(--primary-red);
+      box-shadow: 0 2px 6px rgba(211, 47, 47, 0.35);
+    }
+
+    /* Container */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    /* Summary Card */
+    .summary-card {
+      background: white;
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(211, 47, 47, 0.06);
+    }
+
+    .summary-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--primary-dark);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+    }
+
+    .summary-item {
+      background: var(--primary-light);
+      padding: 8px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(211, 47, 47, 0.15);
+    }
+
+    .summary-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .summary-val {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .badge-diff {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-diff.exact { background: var(--success-bg); color: var(--success); }
+    .badge-diff.short { background: var(--danger-bg); color: var(--danger); }
+    .badge-diff.excess { background: var(--warning-bg); color: var(--warning); }
+
+    /* Denomination Rows */
+    .denom-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #ebebeb;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    .denom-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      justify-content: space-between;
+    }
+
+    .denom-row:last-child {
+      border-bottom: none;
+    }
+
+    .denom-tag {
+      width: 72px;
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .denom-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .step-btn:active {
+      background: #e5e7eb;
+    }
+
+    .denom-input {
+      width: 65px;
+      height: 34px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+      color: var(--text-dark);
+      background: #fff;
+    }
+
+    .denom-input:focus {
+      border-color: var(--primary-red);
+      box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+    }
+
+    .denom-total {
+      width: 80px;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    /* Sales Entry Section */
+    .entry-card {
+      background: white;
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid #ebebeb;
+      margin-bottom: 12px;
+    }
+
+    .entry-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .entry-row label {
+      font-weight: 600;
+      font-size: 13px;
+      flex: 1;
+      color: var(--text-dark);
+    }
+
+    .entry-input {
+      width: 140px;
+      height: 38px;
+      padding: 0 10px;
+      text-align: right;
+      font-size: 15px;
+      font-weight: 700;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .entry-input:focus {
+      border-color: var(--primary-red);
+    }
+
+    /* Overview Full View Table */
+    .overview-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+
+    .overview-table th, .overview-table td {
+      padding: 8px 10px;
+      text-align: right;
+      border-bottom: 1px solid #eee;
+    }
+    .overview-table th:first-child, .overview-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+    }
+    .overview-table th {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* Bottom Action Bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      padding: 10px 16px;
+      display: flex;
+      gap: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+      z-index: 100;
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.06);
+    }
+
+    .action-btn {
+      flex: 1;
+      height: 42px;
+      border-radius: 10px;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .btn-whatsapp {
+      background: #25d366;
+      color: white;
+    }
+
+    .btn-export {
+      background: var(--primary-red);
+      color: white;
+    }
+
+    .btn-reset {
+      flex: 0.4;
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 75px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .toast.show { opacity: 1; }
+
+    .help-banner {
+      background: #fff5f5;
+      border: 1px dashed var(--primary-red);
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #7f1d1d;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
 
-<div class="sheet-container">
-  <h2 class="sheet-title">Daily Counter Cash Management</h2>
-  
-  <div class="date-row">
-    <label>Date:</label>
-    <input type="text" id="reportDate" value="25-09-2026">
+  <!-- Top Red Header -->
+  <header class="header">
+    <div class="header-top">
+      <div>
+        <h1>Daily Cash Counter</h1>
+        <div style="font-size: 11px; opacity: 0.9;">Tally & Settlement Register</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="saveData(true)">💾 Save</button>
+      </div>
+    </div>
+    <div class="date-row">
+      <label for="entryDate">📅 Date:</label>
+      <input type="date" id="entryDate" onchange="handleDateChange()">
+    </div>
+  </header>
+
+  <!-- Sticky Tabs Navigation -->
+  <nav class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('c1')">Counter 1</button>
+    <button class="tab-btn" onclick="switchTab('c2')">Counter 2</button>
+    <button class="tab-btn" onclick="switchTab('total_sale')">Total Sale Cash</button>
+    <button class="tab-btn" onclick="switchTab('float')">Float Cash</button>
+    <button class="tab-btn" onclick="switchTab('sales_entry')">Sales & Advance</button>
+    <button class="tab-btn" onclick="switchTab('overview')">📊 Full Tally</button>
+  </nav>
+
+  <main class="container">
+
+    <!-- Counter 1 Tab -->
+    <div id="tab-c1" class="tab-content">
+      <div class="summary-card">
+        <div class="summary-title">
+          <span>Counter 1 Cash Status</span>
+          <span id="c1-status-badge" class="badge-diff exact">Matched</span>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-label">Counted Cash</div>
+            <div class="summary-val" id="c1-counted-txt">₹0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Expected Sale</div>
+            <div class="summary-val" id="c1-expected-txt">₹0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Difference</div>
+            <div class="summary-val" id="c1-diff-txt">₹0</div>
+          </div>
+        </div>
+      </div>
+      <div class="denom-card" id="c1-denom-list"></div>
+    </div>
+
+    <!-- Counter 2 Tab -->
+    <div id="tab-c2" class="tab-content" style="display:none;">
+      <div class="summary-card">
+        <div class="summary-title">
+          <span>Counter 2 Cash Status</span>
+          <span id="c2-status-badge" class="badge-diff exact">Matched</span>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-label">Counted Cash</div>
+            <div class="summary-val" id="c2-counted-txt">₹0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Expected Sale</div>
+            <div class="summary-val" id="c2-expected-txt">₹0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Difference</div>
+            <div class="summary-val" id="c2-diff-txt">₹0</div>
+          </div>
+        </div>
+      </div>
+      <div class="denom-card" id="c2-denom-list"></div>
+    </div>
+
+    <!-- Total Sale Cash Tab -->
+    <div id="tab-total_sale" class="tab-content" style="display:none;">
+      <div class="summary-card">
+        <div class="summary-title">
+          <span>Total Sale Cash Status</span>
+          <span id="ts-status-badge" class="badge-diff exact">Matched</span>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-label">Counted Cash</div>
+            <div class="summary-val" id="ts-counted-txt">₹0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Expected Sale</div>
+            <div class="summary-val" id="ts-expected-txt">₹0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Difference</div>
+            <div class="summary-val" id="ts-diff-txt">₹0</div>
+          </div>
+        </div>
+      </div>
+      <div class="denom-card" id="ts-denom-list"></div>
+    </div>
+
+    <!-- Float Cash Tab -->
+    <div id="tab-float" class="tab-content" style="display:none;">
+      <div class="summary-card">
+        <div class="summary-title">
+          <span>Float Cash Status</span>
+          <span id="fl-status-badge" class="badge-diff exact">Matched</span>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-label">Counted Float</div>
+            <div class="summary-val" id="fl-counted-txt">₹0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Opening Float</div>
+            <div class="summary-val" id="fl-expected-txt">₹1,000</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Difference</div>
+            <div class="summary-val" id="fl-diff-txt">₹0</div>
+          </div>
+        </div>
+      </div>
+      <div class="entry-card" style="margin-bottom:12px;">
+        <div class="entry-row" style="margin:0;">
+          <label>💼 Target Float Cash Amount (₹):</label>
+          <input type="number" id="floatExpectedInput" class="entry-input" value="1000" oninput="calculateAll()">
+        </div>
+      </div>
+      <div class="denom-card" id="fl-denom-list"></div>
+    </div>
+
+    <!-- Sales & Advance Tab -->
+    <div id="tab-sales_entry" class="tab-content" style="display:none;">
+      <div class="summary-card">
+        <div class="summary-title">
+          <span>Sales & Advance Summary</span>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item" style="grid-column: span 3;">
+            <div class="summary-label">Total Sale Cash (B17)</div>
+            <div class="summary-val" id="sales-grand-total-txt" style="font-size:20px; color:var(--primary-red);">₹0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="entry-card">
+        <h3 style="font-size:14px; margin-bottom:12px; color:var(--primary-dark);">Daily Cash Sales Entries</h3>
+        <div class="entry-row">
+          <label>💵 Sale Amount 1 (Primary):</label>
+          <input type="number" id="sale_amt_1" class="entry-input" value="0" oninput="calculateAll()">
+        </div>
+        <div class="entry-row">
+          <label>💵 Sale Amount 2:</label>
+          <input type="number" id="sale_amt_2" class="entry-input" value="0" oninput="calculateAll()">
+        </div>
+        <div class="entry-row">
+          <label>💵 Sale Amount 3:</label>
+          <input type="number" id="sale_amt_3" class="entry-input" value="0" oninput="calculateAll()">
+        </div>
+        <div class="entry-row">
+          <label>💵 Sale Amount 4:</label>
+          <input type="number" id="sale_amt_4" class="entry-input" value="0" oninput="calculateAll()">
+        </div>
+        <div class="entry-row" style="border-top:1px dashed #ddd; padding-top:10px;">
+          <label>🤝 Advance Cash:</label>
+          <input type="number" id="sale_advance" class="entry-input" value="0" oninput="calculateAll()">
+        </div>
+      </div>
+      <div class="help-banner">
+        💡 <b>Note:</b> Total Sale Cash = Sale 1 + Sale 2 + Sale 3 + Sale 4 + Advance. This automatically updates the expected sale amount across Counter 1, Counter 2, and Total Sale Cash.
+      </div>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="tab-overview" class="tab-content" style="display:none;">
+      <div class="summary-card" style="margin-bottom:14px;">
+        <div class="summary-title">Overall Day Closing Summary</div>
+        <table class="overview-table">
+          <thead>
+            <tr>
+              <th>Counter</th>
+              <th>Counted</th>
+              <th>Expected</th>
+              <th>Diff</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Counter 1</td>
+              <td id="ov-c1-count">₹0</td>
+              <td id="ov-c1-exp">₹0</td>
+              <td id="ov-c1-diff">₹0</td>
+            </tr>
+            <tr>
+              <td>Counter 2</td>
+              <td id="ov-c2-count">₹0</td>
+              <td id="ov-c2-exp">₹0</td>
+              <td id="ov-c2-diff">₹0</td>
+            </tr>
+            <tr>
+              <td>Total Sale</td>
+              <td id="ov-ts-count">₹0</td>
+              <td id="ov-ts-exp">₹0</td>
+              <td id="ov-ts-diff">₹0</td>
+            </tr>
+            <tr style="background:#fff7f7; font-weight:700;">
+              <td>Float Cash</td>
+              <td id="ov-fl-count">₹0</td>
+              <td id="ov-fl-exp">₹1,000</td>
+              <td id="ov-fl-diff">₹0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="denom-card" style="padding:12px;">
+        <h4 style="font-size:13px; margin-bottom:8px; color:var(--text-dark);">Denomination Breakdown (All Counters)</h4>
+        <div style="overflow-x:auto;">
+          <table class="overview-table" id="ov-matrix-table">
+            <thead>
+              <tr>
+                <th>Denom</th>
+                <th>C1</th>
+                <th>C2</th>
+                <th>Sale</th>
+                <th>Float</th>
+              </tr>
+            </thead>
+            <tbody id="ov-matrix-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Action Bar -->
+  <div class="bottom-bar">
+    <button class="action-btn btn-reset" onclick="confirmReset()" title="Reset All">🔄 Clear</button>
+    <button class="action-btn btn-export" onclick="exportToCSV()">📥 Download CSV</button>
+    <button class="action-btn btn-whatsapp" onclick="shareWhatsApp()">💬 WhatsApp</button>
   </div>
 
-  <!-- TABLE 1: TOTAL SALE CASH (Counter 1 + Counter 2) -->
-  <table>
-    <thead>
-      <tr class="header-brown">
-        <th colspan="5">TOTAL SALE CASH</th>
-      </tr>
-      <tr class="sub-header">
-        <th style="width: 18%;">Denom</th>
-        <th style="width: 20%;">C-1 Count</th>
-        <th style="width: 20%;">C-2 Count</th>
-        <th style="width: 17%;">Total Count</th>
-        <th style="width: 25%;">Amount (₹)</th>
-      </tr>
-    </thead>
-    <tbody id="saleBody">
-      <!-- Generated rows for 500, 200, 100, 50, 20, 10, Coin -->
-    </tbody>
-    <tfoot>
-      <tr class="total-row header-brown">
-        <td colspan="3" style="text-align: right; padding-right: 15px;">Total Sale Cash:</td>
-        <td id="totalSaleCount">0</td>
-        <td class="amt-col" id="totalSaleAmount">₹ 0.00</td>
-      </tr>
-    </tfoot>
-  </table>
+  <div id="toast" class="toast">Saved successfully!</div>
 
-  <!-- Difference / Balance Check Section -->
-  <table class="diff-table">
-    <tr style="background-color: #f8fafc;">
-      <td style="font-weight: bold; width: 45%;">System / POS Sale Cash:</td>
-      <td style="width: 25%;">
-        <input type="number" id="posCash" placeholder="0" style="max-width: 120px;" oninput="updateCalculations()">
-      </td>
-      <td class="amt-col" id="diffDisplay" style="color: #0f766e;">Diff: ₹ 0.00</td>
-    </tr>
-  </table>
+  <script>
+    const DENOMS = [500, 200, 100, 50, 20, 10, 'Coin'];
+    const SECTIONS = ['c1', 'c2', 'ts', 'fl'];
 
-  <!-- TABLE 2: FLOAT CASH (Separate Table) -->
-  <table>
-    <thead>
-      <tr class="header-brown">
-        <th colspan="3">FLOAT CASH</th>
-      </tr>
-      <tr class="sub-header">
-        <th style="width: 25%;">Denom</th>
-        <th style="width: 35%;">Count</th>
-        <th style="width: 40%;">Amount (₹)</th>
-      </tr>
-    </thead>
-    <tbody id="floatBody">
-      <!-- Generated rows for Float -->
-    </tbody>
-    <tfoot>
-      <tr class="total-row header-brown">
-        <td style="text-align: right; padding-right: 15px;">Total Float:</td>
-        <td id="totalFloatCount">0</td>
-        <td class="amt-col" id="totalFloatAmount">₹ 0.00</td>
-      </tr>
-    </tfoot>
-  </table>
+    // State object
+    let appData = {
+      date: new Date().toISOString().split('T')[0],
+      sales: { s1: 0, s2: 0, s3: 0, s4: 0, advance: 0 },
+      floatExpected: 1000,
+      counts: {
+        c1: { 500:0, 200:0, 100:0, 50:0, 20:0, 10:0, Coin:0 },
+        c2: { 500:0, 200:0, 100:0, 50:0, 20:0, 10:0, Coin:0 },
+        ts: { 500:0, 200:0, 100:0, 50:0, 20:0, 10:0, Coin:0 },
+        fl: { 500:0, 200:0, 100:0, 50:0, 20:0, 10:0, Coin:0 }
+      }
+    };
 
-  <!-- Buttons -->
-  <div class="btn-wrap">
-    <button class="btn btn-reset" onclick="resetForm()">Reset All</button>
-    <button class="btn btn-print" onclick="window.print()">Print / Save PDF</button>
-  </div>
-</div>
+    function init() {
+      // Build counter rows dynamically
+      SECTIONS.forEach(sec => {
+        const container = document.getElementById(`${sec}-denom-list`);
+        if (!container) return;
+        container.innerHTML = '';
+        DENOMS.forEach(d => {
+          const isCoin = d === 'Coin';
+          const label = isCoin ? '🪙 Coin' : `₹${d}`;
+          const row = document.createElement('div');
+          row.className = 'denom-row';
+          row.innerHTML = `
+            <div class="denom-tag">${label}</div>
+            <div class="denom-control">
+              <button class="step-btn" type="button" onclick="adjustCount('${sec}', '${d}', -1)">-</button>
+              <input type="number" 
+                     id="inp-${sec}-${d}" 
+                     class="denom-input" 
+                     inputmode="numeric" 
+                     pattern="[0-9]*" 
+                     value="0" 
+                     min="0"
+                     oninput="onCountChange('${sec}', '${d}', this.value)"
+                     onfocus="this.select()">
+              <button class="step-btn" type="button" onclick="adjustCount('${sec}', '${d}', 1)">+</button>
+            </div>
+            <div class="denom-total" id="tot-${sec}-${d}">₹0</div>
+          `;
+          container.appendChild(row);
+        });
+      });
 
-<script>
-  const denoms = [
-    { label: "500", val: 500 },
-    { label: "200", val: 200 },
-    { label: "100", val: 100 },
-    { label: "50", val: 50 },
-    { label: "20", val: 20 },
-    { label: "10", val: 10 },
-    { label: "Coin", val: 1 }
-  ];
+      loadSavedData();
+      document.getElementById('entryDate').value = appData.date;
+      calculateAll();
+    }
 
-  function renderTables() {
-    const saleBody = document.getElementById('saleBody');
-    const floatBody = document.getElementById('floatBody');
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+      
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      const tabTarget = document.getElementById(`tab-${tabId}`);
+      if (tabTarget) tabTarget.style.display = 'block';
 
-    denoms.forEach((d, i) => {
-      // Sale Table Row
-      saleBody.innerHTML += `
-        <tr>
-          <td><strong>${d.label}</strong></td>
-          <td><input type="number" min="0" id="c1_${i}" oninput="updateCalculations()"></td>
-          <td><input type="number" min="0" id="c2_${i}" oninput="updateCalculations()"></td>
-          <td id="sumCount_${i}">0</td>
-          <td class="amt-col" id="amt_${i}">₹ 0.00</td>
-        </tr>
-      `;
+      if (tabId === 'overview') {
+        renderOverviewMatrix();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-      // Float Table Row (without coin if not needed, or with coin)
-      if (d.label !== "Coin") {
-        floatBody.innerHTML += `
-          <tr>
-            <td><strong>${d.label}</strong></td>
-            <td><input type="number" min="0" id="flt_${i}" oninput="updateCalculations()"></td>
-            <td class="amt-col" id="fltAmt_${i}">₹ 0.00</td>
-          </tr>
+    function adjustCount(sec, d, delta) {
+      let cur = parseInt(appData.counts[sec][d]) || 0;
+      let next = Math.max(0, cur + delta);
+      appData.counts[sec][d] = next;
+      const inp = document.getElementById(`inp-${sec}-${d}`);
+      if (inp) inp.value = next;
+      calculateAll();
+    }
+
+    function onCountChange(sec, d, val) {
+      let num = parseInt(val) || 0;
+      if (num < 0) num = 0;
+      appData.counts[sec][d] = num;
+      calculateAll();
+    }
+
+    function handleDateChange() {
+      appData.date = document.getElementById('entryDate').value;
+      saveData(false);
+    }
+
+    function calculateTotalSaleCash() {
+      const s1 = parseFloat(document.getElementById('sale_amt_1').value) || 0;
+      const s2 = parseFloat(document.getElementById('sale_amt_2').value) || 0;
+      const s3 = parseFloat(document.getElementById('sale_amt_3').value) || 0;
+      const s4 = parseFloat(document.getElementById('sale_amt_4').value) || 0;
+      const adv = parseFloat(document.getElementById('sale_advance').value) || 0;
+      appData.sales = { s1, s2, s3, s4, advance: adv };
+      return s1 + s2 + s3 + s4 + adv;
+    }
+
+    function calculateSectionTotal(sec) {
+      let total = 0;
+      DENOMS.forEach(d => {
+        const count = parseInt(appData.counts[sec][d]) || 0;
+        const rowVal = (d === 'Coin') ? count : count * d;
+        total += rowVal;
+        const totEl = document.getElementById(`tot-${sec}-${d}`);
+        if (totEl) totEl.innerText = '₹' + rowVal.toLocaleString('en-IN');
+      });
+      return total;
+    }
+
+    function updateBadge(badgeEl, diff) {
+      badgeEl.className = 'badge-diff';
+      if (diff === 0) {
+        badgeEl.classList.add('exact');
+        badgeEl.innerText = '✅ Balanced';
+      } else if (diff > 0) {
+        badgeEl.classList.add('short');
+        badgeEl.innerText = `⚠️ Short ₹${Math.abs(diff).toLocaleString('en-IN')}`;
+      } else {
+        badgeEl.classList.add('excess');
+        badgeEl.innerText = `➕ Excess ₹${Math.abs(diff).toLocaleString('en-IN')}`;
+      }
+    }
+
+    function calculateAll() {
+      const totalSaleCash = calculateTotalSaleCash();
+      document.getElementById('sales-grand-total-txt').innerText = '₹' + totalSaleCash.toLocaleString('en-IN');
+
+      const expectedFloat = parseFloat(document.getElementById('floatExpectedInput').value) || 0;
+      appData.floatExpected = expectedFloat;
+
+      const c1Count = calculateSectionTotal('c1');
+      const c2Count = calculateSectionTotal('c2');
+      const tsCount = calculateSectionTotal('ts');
+      const flCount = calculateSectionTotal('fl');
+
+      // Tally differences (Expected - Counted)
+      const c1Diff = totalSaleCash - c1Count;
+      const c2Diff = totalSaleCash - c2Count;
+      const tsDiff = totalSaleCash - tsCount;
+      const flDiff = expectedFloat - flCount;
+
+      // Update Counter 1 UI
+      document.getElementById('c1-counted-txt').innerText = '₹' + c1Count.toLocaleString('en-IN');
+      document.getElementById('c1-expected-txt').innerText = '₹' + totalSaleCash.toLocaleString('en-IN');
+      document.getElementById('c1-diff-txt').innerText = (c1Diff >= 0 ? '₹' : '-₹') + Math.abs(c1Diff).toLocaleString('en-IN');
+      updateBadge(document.getElementById('c1-status-badge'), c1Diff);
+
+      // Update Counter 2 UI
+      document.getElementById('c2-counted-txt').innerText = '₹' + c2Count.toLocaleString('en-IN');
+      document.getElementById('c2-expected-txt').innerText = '₹' + totalSaleCash.toLocaleString('en-IN');
+      document.getElementById('c2-diff-txt').innerText = (c2Diff >= 0 ? '₹' : '-₹') + Math.abs(c2Diff).toLocaleString('en-IN');
+      updateBadge(document.getElementById('c2-status-badge'), c2Diff);
+
+      // Update Total Sale Cash UI
+      document.getElementById('ts-counted-txt').innerText = '₹' + tsCount.toLocaleString('en-IN');
+      document.getElementById('ts-expected-txt').innerText = '₹' + totalSaleCash.toLocaleString('en-IN');
+      document.getElementById('ts-diff-txt').innerText = (tsDiff >= 0 ? '₹' : '-₹') + Math.abs(tsDiff).toLocaleString('en-IN');
+      updateBadge(document.getElementById('ts-status-badge'), tsDiff);
+
+      // Update Float Cash UI
+      document.getElementById('fl-counted-txt').innerText = '₹' + flCount.toLocaleString('en-IN');
+      document.getElementById('fl-expected-txt').innerText = '₹' + expectedFloat.toLocaleString('en-IN');
+      document.getElementById('fl-diff-txt').innerText = (flDiff >= 0 ? '₹' : '-₹') + Math.abs(flDiff).toLocaleString('en-IN');
+      updateBadge(document.getElementById('fl-status-badge'), flDiff);
+
+      // Overview Tab UI
+      document.getElementById('ov-c1-count').innerText = '₹' + c1Count.toLocaleString('en-IN');
+      document.getElementById('ov-c1-exp').innerText = '₹' + totalSaleCash.toLocaleString('en-IN');
+      document.getElementById('ov-c1-diff').innerText = '₹' + c1Diff.toLocaleString('en-IN');
+
+      document.getElementById('ov-c2-count').innerText = '₹' + c2Count.toLocaleString('en-IN');
+      document.getElementById('ov-c2-exp').innerText = '₹' + totalSaleCash.toLocaleString('en-IN');
+      document.getElementById('ov-c2-diff').innerText = '₹' + c2Diff.toLocaleString('en-IN');
+
+      document.getElementById('ov-ts-count').innerText = '₹' + tsCount.toLocaleString('en-IN');
+      document.getElementById('ov-ts-exp').innerText = '₹' + totalSaleCash.toLocaleString('en-IN');
+      document.getElementById('ov-ts-diff').innerText = '₹' + tsDiff.toLocaleString('en-IN');
+
+      document.getElementById('ov-fl-count').innerText = '₹' + flCount.toLocaleString('en-IN');
+      document.getElementById('ov-fl-exp').innerText = '₹' + expectedFloat.toLocaleString('en-IN');
+      document.getElementById('ov-fl-diff').innerText = '₹' + flDiff.toLocaleString('en-IN');
+
+      saveData(false);
+    }
+
+    function renderOverviewMatrix() {
+      const tbody = document.getElementById('ov-matrix-body');
+      tbody.innerHTML = '';
+      DENOMS.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${d === 'Coin' ? 'Coins' : '₹' + d}</td>
+          <td>${appData.counts.c1[d]}</td>
+          <td>${appData.counts.c2[d]}</td>
+          <td>${appData.counts.ts[d]}</td>
+          <td>${appData.counts.fl[d]}</td>
         `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveData(showToastMsg) {
+      localStorage.setItem('mo_cash_tally_data', JSON.stringify(appData));
+      if (showToastMsg) {
+        showToast('Data saved on phone!');
       }
-    });
-  }
+    }
 
-  function updateCalculations() {
-    let grandSaleCount = 0;
-    let grandSaleAmt = 0;
+    function loadSavedData() {
+      try {
+        const saved = localStorage.getItem('mo_cash_tally_data');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          appData = { ...appData, ...parsed };
 
-    denoms.forEach((d, i) => {
-      let c1 = parseInt(document.getElementById(`c1_${i}`).value) || 0;
-      let c2 = parseInt(document.getElementById(`c2_${i}`).value) || 0;
-      let rowCount = c1 + c2;
-      let rowAmt = rowCount * d.val;
+          document.getElementById('entryDate').value = appData.date || new Date().toISOString().split('T')[0];
+          document.getElementById('sale_amt_1').value = appData.sales.s1 || 0;
+          document.getElementById('sale_amt_2').value = appData.sales.s2 || 0;
+          document.getElementById('sale_amt_3').value = appData.sales.s3 || 0;
+          document.getElementById('sale_amt_4').value = appData.sales.s4 || 0;
+          document.getElementById('sale_advance').value = appData.sales.advance || 0;
+          document.getElementById('floatExpectedInput').value = appData.floatExpected || 1000;
 
-      grandSaleCount += rowCount;
-      grandSaleAmt += rowAmt;
-
-      document.getElementById(`sumCount_${i}`).innerText = rowCount;
-      document.getElementById(`amt_${i}`).innerText = "₹ " + rowAmt.toLocaleString('en-IN', {minimumFractionDigits: 2});
-    });
-
-    document.getElementById('totalSaleCount').innerText = grandSaleCount;
-    document.getElementById('totalSaleAmount').innerText = "₹ " + grandSaleAmt.toLocaleString('en-IN', {minimumFractionDigits: 2});
-
-    // POS Cash Difference Check
-    let posVal = parseFloat(document.getElementById('posCash').value) || 0;
-    let diff = grandSaleAmt - posVal;
-    let diffEl = document.getElementById('diffDisplay');
-    diffEl.innerText = (diff >= 0 ? "+ ₹ " : "- ₹ ") + Math.abs(diff).toLocaleString('en-IN', {minimumFractionDigits: 2});
-    diffEl.style.color = diff === 0 ? "#0f766e" : (diff > 0 ? "#16a34a" : "#dc2626");
-
-    // Float Calculations
-    let grandFloatCount = 0;
-    let grandFloatAmt = 0;
-
-    denoms.forEach((d, i) => {
-      let fltInput = document.getElementById(`flt_${i}`);
-      if (fltInput) {
-        let count = parseInt(fltInput.value) || 0;
-        let amt = count * d.val;
-        grandFloatCount += count;
-        grandFloatAmt += amt;
-        document.getElementById(`fltAmt_${i}`).innerText = "₹ " + amt.toLocaleString('en-IN', {minimumFractionDigits: 2});
+          SECTIONS.forEach(sec => {
+            DENOMS.forEach(d => {
+              const el = document.getElementById(`inp-${sec}-${d}`);
+              if (el && appData.counts[sec]) {
+                el.value = appData.counts[sec][d] || 0;
+              }
+            });
+          });
+        }
+      } catch (e) {
+        console.error('Error loading data', e);
       }
-    });
+    }
 
-    document.getElementById('totalFloatCount').innerText = grandFloatCount;
-    document.getElementById('totalFloatAmount').innerText = "₹ " + grandFloatAmt.toLocaleString('en-IN', {minimumFractionDigits: 2});
-  }
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
 
-  function resetForm() {
-    document.querySelectorAll('input[type="number"]').forEach(input => input.value = '');
-    updateCalculations();
-  }
+    function confirmReset() {
+      if (confirm('Clear all counts and start a new day?')) {
+        SECTIONS.forEach(sec => {
+          DENOMS.forEach(d => {
+            appData.counts[sec][d] = 0;
+            const el = document.getElementById(`inp-${sec}-${d}`);
+            if (el) el.value = 0;
+          });
+        });
+        document.getElementById('sale_amt_1').value = 0;
+        document.getElementById('sale_amt_2').value = 0;
+        document.getElementById('sale_amt_3').value = 0;
+        document.getElementById('sale_amt_4').value = 0;
+        document.getElementById('sale_advance').value = 0;
+        calculateAll();
+        showToast('All fields reset!');
+      }
+    }
 
-  renderTables();
-</script>
+    function shareWhatsApp() {
+      const date = appData.date;
+      const totalSale = calculateTotalSaleCash();
+      const c1Count = calculateSectionTotal('c1');
+      const c2Count = calculateSectionTotal('c2');
+      const tsCount = calculateSectionTotal('ts');
+      const flCount = calculateSectionTotal('fl');
+      const flExp = appData.floatExpected;
 
+      let msg = `*📊 DAILY CASH TALLY REPORT*\n`;
+      msg += `📅 *Date:* ${date}\n`;
+      msg += `💰 *Total Sale Cash:* ₹${totalSale.toLocaleString('en-IN')}\n`;
+      msg += `----------------------------\n`;
+      msg += `🛒 *Counter 1:*\n`;
+      msg += `• Counted: ₹${c1Count.toLocaleString('en-IN')}\n`;
+      msg += `• Diff: ₹${(totalSale - c1Count).toLocaleString('en-IN')}\n\n`;
+
+      msg += `🛒 *Counter 2:*\n`;
+      msg += `• Counted: ₹${c2Count.toLocaleString('en-IN')}\n`;
+      msg += `• Diff: ₹${(totalSale - c2Count).toLocaleString('en-IN')}\n\n`;
+
+      msg += `💵 *Total Sale Cash Section:*\n`;
+      msg += `• Counted: ₹${tsCount.toLocaleString('en-IN')}\n`;
+      msg += `• Diff: ₹${(totalSale - tsCount).toLocaleString('en-IN')}\n\n`;
+
+      msg += `💼 *Float Cash:*\n`;
+      msg += `• Counted: ₹${flCount.toLocaleString('en-IN')}\n`;
+      msg += `• Target Float: ₹${flExp.toLocaleString('en-IN')}\n`;
+      msg += `• Diff: ₹${(flExp - flCount).toLocaleString('en-IN')}\n`;
+      msg += `----------------------------\n`;
+      msg += `Generated via Daily Cash Register`;
+
+      const encoded = encodeURI(msg).replace(/%5Cn/g, '%0A');
+      window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+    }
+
+    function exportToCSV() {
+      const date = appData.date;
+      const totalSale = calculateTotalSaleCash();
+      const flExp = appData.floatExpected;
+
+      let csv = `${date},COUNTER 1,,${date},COUNTER 2,,,TOTAL SALE CASH,,FLOAT CASH,,\n`;
+      
+      DENOMS.forEach(d => {
+        const val1 = d === 'Coin' ? appData.counts.c1[d] : appData.counts.c1[d] * d;
+        const val2 = d === 'Coin' ? appData.counts.c2[d] : appData.counts.c2[d] * d;
+        const val3 = d === 'Coin' ? appData.counts.ts[d] : appData.counts.ts[d] * d;
+        const val4 = d === 'Coin' ? appData.counts.fl[d] : appData.counts.fl[d] * d;
+        csv += `${d},${appData.counts.c1[d]},${val1},${d},${appData.counts.c2[d]},${val2},${d},${appData.counts.ts[d]},${val3},${d},${appData.counts.fl[d]},${val4}\n`;
+      });
+
+      const c1Tot = calculateSectionTotal('c1');
+      const c2Tot = calculateSectionTotal('c2');
+      const tsTot = calculateSectionTotal('ts');
+      const flTot = calculateSectionTotal('fl');
+
+      csv += `Total ,,${c1Tot},Total ,,${c2Tot},Total ,,${tsTot},Total,,${flTot}\n`;
+      csv += `Total Sale Cash,${totalSale},${totalSale - c1Tot},Total Sale Cash,${totalSale},${totalSale - c2Tot},Total Sale Cash,${totalSale},${totalSale - tsTot},Total Float Cash,${flExp},${flExp - flTot}\n`;
+      csv += `Date,Amount,,,,,,,,,\n`;
+      csv += `${date},${appData.sales.s1},,,,,,,,,\n`;
+      csv += `Sale 2,${appData.sales.s2},,,,,,,,,\n`;
+      csv += `Sale 3,${appData.sales.s3},,,,,,,,,\n`;
+      csv += `Sale 4,${appData.sales.s4},,,,,,,,,\n`;
+      csv += ` Advance,${appData.sales.advance},,,,,,,,,\n`;
+      csv += `Total,${totalSale},,,,,,,,,\n`;
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Cash_Tally_${date}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
